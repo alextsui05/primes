@@ -31,8 +31,8 @@ function nextPrimesChunk(current: number, count = CHUNK_SIZE): number[] {
 export function PrimesList() {
   const [primes, setPrimes] = React.useState<number[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [searchParams] = useSearchParams();
-  const start = parseInt(searchParams.get("n") ?? "2");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [start, setStart] = React.useState<number>(2);
   const sentinelRef = React.useRef<HTMLDivElement | null>(null);
 
   const loadMore = React.useCallback(() => {
@@ -48,10 +48,17 @@ export function PrimesList() {
     setIsLoading(false);
   }, [isLoading]);
 
+  const restart = React.useCallback((startingValue: number) => {
+    setStart(startingValue);
+    setPrimes(nextPrimesChunk(startingValue, CHUNK_SIZE));
+    setSearchParams({ n: startingValue.toString() });
+  }, []);
+
   // Seed first 100 primes on mount (client only)
   React.useEffect(() => {
-    setPrimes(nextPrimesChunk(start, CHUNK_SIZE));
-  }, [start]);
+    const startingValue = parseInt(searchParams.get("n") ?? "2");
+    restart(startingValue);
+  }, [searchParams]);
 
   // Infinite scroll using IntersectionObserver
   React.useEffect(() => {
@@ -84,6 +91,14 @@ export function PrimesList() {
         You can also specify the query parameter <code>n</code> to start from a different number.
         For example, you can <NavLink to="?n=1000000007" className="text-blue-600 hover:underline">start from the 1000000007th prime</NavLink> by typing in <code>?n=1000000007</code> in the URL.
       </p>
+
+      <p className="flex items-center gap-2 my-4">
+        <label htmlFor="start">Start from:</label>
+        <input className="border border-gray-200 rounded p-2" type="number" min="2" max="2147483647" id="start" value={start} onChange={(e) => restart(parseInt(e.target.value))} />
+        <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" onClick={() => restart(Math.floor(Math.random() * 2147483647))}>I'm feeling lucky</button>
+      </p>
+
+
       
       <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         {primes.map((p, idx) => (
