@@ -136,7 +136,7 @@ export function PrimesList() {
         {primes.map((p, idx) => (
           <li
             key={idx}
-            className="rounded border border-gray-200 p-2 text-center bg-white shadow-sm"
+            className="rounded border border-gray-200 p-2 text-center bg-white dark:bg-gray-800 dark:border-gray-700 shadow-sm"
             aria-label={`prime-${p}`}
           >
             {p}
